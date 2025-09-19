@@ -1,75 +1,19 @@
-# Nuxt Minimal Starter
+# Nuxt4 プロジェクト構成
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
-
-## Setup
-
-Make sure to install dependencies:
-
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+```plaintext
+📁 app/ # クライアント関係のコードを格納（Nuxt4 で導入）
+├── 📁 assets/ # 画像・フォント・スタイルなど静的アセット
+├── 📁 components/ # 再利用可能な UI コンポーネント（Atomic Design など）
+│ ├── 📁 atoms/ # 最小単位（ボタン、入力欄、アイコンなど）
+│ ├── 📁 molecules/ # atoms の組み合わせ（入力セルなど）
+│ ├── 📁 organisms/ # molecules の組み合わせ（入力フォームなど）
+│ └── 📁 templates/ # organisms をまとめたページ枠組み（お問い合わせフォームなど）
+├── 📁 composables/ # Composition API で書かれた再利用可能ロジック
+├── 📁 layouts/ # 共通レイアウト
+├── 📁 middleware/ # ページ描画前に実行される関数
+├── 📁 pages/ # 各ページ（ルーティング対応）
+└── 📁 plugins/ # Vue プラグイン設定
+📁 public/ # 公開される静的ファイル
+📁 server/ # サーバーサイドの API や処理
+📁 shared/ # クライアント & サーバー共通の utils や型定義
 ```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
