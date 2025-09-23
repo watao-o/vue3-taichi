@@ -2,6 +2,7 @@
 import * as fabric from "fabric";
 import { v4 as uuid } from "uuid";
 
+const emit = defineEmits(["export-svg"]);
 const canvasRef = ref<HTMLCanvasElement>();
 const fabricCanvas = ref<fabric.Canvas>();
 const { startDraw, endDraw } = useFreeDrawPlugin(fabricCanvas);
@@ -19,15 +20,8 @@ watch(canvasRef, () => {
 const exportCanvasToSVG = () => {
   if (fabricCanvas.value) {
     const svgData = fabricCanvas.value.toSVG();
-    const blob = new Blob([svgData], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "canvas-export.svg";
-    link.click();
-
-    URL.revokeObjectURL(url);
+    // SVGデータを親コンポーネントに渡す
+    emit("export-svg", svgData);
   }
 };
 
@@ -102,6 +96,14 @@ const uploadSVGToCanvas = (event: Event) => {
   }
   input.value = ""; // 同じファイルを再度選択できるようにする
 };
+
+const deleteSelectedObject = () => {
+  const activeObject = fabricCanvas.value?.getActiveObject();
+  if (activeObject) {
+    fabricCanvas.value?.remove(activeObject);
+    fabricCanvas.value?.renderAll();
+  }
+};
 </script>
 
 <template>
@@ -111,10 +113,13 @@ const uploadSVGToCanvas = (event: Event) => {
     </ClientOnly>
 
     <div class="control-buttons">
-      <v-btn color="#424242" @click="startDraw({ width: 5, color: '#000000' })">
+      <v-btn color="black" @click="startDraw({ width: 5, color: '#000000' })">
         お絵描き開始
       </v-btn>
-      <v-btn color="#424242" @click="endDraw"> お絵描き終了</v-btn>
+      <v-btn color="black" @click="endDraw"> お絵描き終了</v-btn>
+      <v-btn color="black" @click="deleteSelectedObject"
+        >選択オブジェクト削除</v-btn
+      >
       <v-btn @click="groupSelected" color="blue">グループ化</v-btn>
       <v-btn @click="ungroupSelected" color="blue">グループ解除</v-btn>
       <v-btn color="green" @click="uploadInputRef?.click()">Template入力</v-btn>
@@ -126,7 +131,7 @@ const uploadSVGToCanvas = (event: Event) => {
         ref="uploadInputRef2"
         style="display: none"
       />
-      <v-btn @click="exportCanvasToSVG" color="red">SVGダウンロード</v-btn>
+      <v-btn @click="exportCanvasToSVG" color="red">SVGエクスポート</v-btn>
       <input
         type="file"
         accept="image/svg+xml"

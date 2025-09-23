@@ -1,11 +1,11 @@
 <template>
   <NuxtLayout>
     <v-app>
-      <SVGEditor />
+      <Tiptap />
     </v-app>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-import SVGEditor from "~/components/SVGEditor.vue";
+import Tiptap from "~/components/Tiptap.vue";
 </script>
