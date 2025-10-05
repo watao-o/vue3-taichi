@@ -15,17 +15,32 @@ export default defineNuxtConfig({
         if (!config.plugins) {
           config.plugins = [];
         }
-        config.plugins.push(vuetify({ autoImport: true }));
+        config.plugins.push(vuetify({ autoImport: true }) as any);
       });
     },
     "@nuxt/eslint",
     "@pinia/nuxt",
+    "@nuxtjs/tailwindcss",
+    "@nuxtjs/ngrok",
   ],
   vite: {
     vue: {
       template: {
         transformAssetUrls,
       },
+    },
+    server: {
+      allowedHosts: ["parenteral-inarguably-semaj.ngrok-free.dev"],
+    },
+  },
+  ngrok: {
+    authtoken_from_env: true,
+  },
+  app: {
+    head: {
+      meta: [
+        { name: "viewport", content: "width=device-width, initial-scale=1.0" },
+      ],
     },
   },
 });

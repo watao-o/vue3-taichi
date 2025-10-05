@@ -1,43 +1,52 @@
 <template>
-  <div class="container">
-    <div class="editor-container">
-      <div class="control-buttons">
-        <v-btn @click="dialog = true" color="blue">Open SVG Editor</v-btn>
-        <v-btn @click="downloadSVG" color="green" :disabled="!svgData"
-          >Download SVG</v-btn
-        >
+  <div class="mx-auto p-4 sm:p-6 bg-gray-100 min-h-screen">
+    <div class="bg-white shadow-md rounded-lg p-4 sm:p-6">
+      <div class="flex flex-wrap gap-4 mb-4">
+        <v-btn @click="dialog = true" color="blue"> Open SVG Editor </v-btn>
+        <v-btn @click="downloadSVG" :disabled="!svgData" color="blue">
+          Download SVG
+        </v-btn>
+        <v-btn @click="exportEditor" color="blue"> Export Data </v-btn>
       </div>
-      <v-dialog v-model="dialog" max-width="1500">
-        <template #default>
-          <SVGEditor @export-svg="insertSVGAsImage" />
-        </template>
+      <v-dialog v-model="dialog">
+        <SVGEditor @export-svg="insertSVGAsImage" />
       </v-dialog>
-      <editor-content :editor="editor" class="editor-content" />
+      <editor-content
+        :editor="editor"
+        class="border border-gray-300 rounded p-4 sm:p-6 bg-gray-50"
+      />
     </div>
   </div>
 </template>
 
-<script setup>
-import { useEditor, EditorContent } from "@tiptap/vue-3";
+<script setup lang="ts">
+import { useEditor, EditorContent, type JSONContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
-import Document from "@tiptap/extension-document";
 import Image from "@tiptap/extension-image";
 import SVGEditor from "./SVGEditor.vue";
 
 const dialog = ref(false);
-const svgData = ref(null); // SVGデータを保存するためのref
+const svgData = ref<string | null>(null); // SVGデータを保存するためのref
 
 const editor = useEditor({
   content: "<p>I'm running Tiptap with Vue.js. 🎉</p>",
-  extensions: [StarterKit, Document, Image],
+  extensions: [StarterKit, Image],
 });
+const editorStore = useEditorStore();
 
-const insertSVGAsImage = (svg) => {
+const insertSVGAsImage = (svg: string) => {
   svgData.value = svg; // SVGデータを保存
-  editor.value
-    .chain()
+
+  const bytes = new TextEncoder().encode(svg);
+  const binString = Array.from(bytes, (byte) =>
+    String.fromCodePoint(byte)
+  ).join("");
+  editor
+    .value!.chain()
     .focus()
-    .setImage({ src: `data:image/svg+xml;base64,${btoa(svg)}` })
+    .setImage({
+      src: `data:image/svg+xml;base64,${btoa(binString)}`,
+    })
     .run();
   dialog.value = false; // モーダルを閉じる
 };
@@ -50,32 +59,11 @@ const downloadSVG = () => {
   link.download = "image-node.svg";
   link.click();
 };
+
+const exportEditor = () => {
+  const data = editor.value!.getJSON() as JSONContent;
+  editorStore.setEditorData(data);
+};
 </script>
 
-<style scoped>
-.container {
-  background-color: #c43a3aa2; /* 背景色を薄いグレーに設定 */
-}
-.editor-container {
-  width: 100vw; /* 横幅をブラウザ画面全体に設定 */
-  height: 100vh; /* 縦幅をブラウザ画面全体に設定 */
-  border: 1px solid #ddd; /* 境界線を追加 */
-  border-radius: 8px;
-  background-color: #52c595; /* 背景色 */
-  padding: 16px; /* 内側の余白を追加 */
-  overflow: auto; /* コンテンツがはみ出した場合にスクロール可能にする */
-}
-
-.control-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.editor-content {
-  min-height: 100%; /* エディタの高さをコンテナに合わせる */
-  padding: 8px; /* 入力箇所に余白を追加 */
-  background-color: #fff; /* 入力エリアの背景色を白に設定 */
-  border-radius: 4px; /* 入力エリアの角を丸くする */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* 入力エリアに影を追加 */
-}
-</style>
+<style scoped></style>

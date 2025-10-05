@@ -104,12 +104,37 @@ const deleteSelectedObject = () => {
     fabricCanvas.value?.renderAll();
   }
 };
+
+const addTextbox = () => {
+  const textbox = new fabric.Textbox("テキストを入力", {
+    left: 100,
+    top: 100,
+    width: 200,
+    fontSize: 20,
+    fill: "#000000",
+    backgroundColor: "#ffffff",
+    borderColor: "#000000",
+    editable: true,
+  });
+
+  // Add event listeners for editing mode
+  textbox.on("mousedblclick", () => {
+    textbox.enterEditing();
+    textbox.hiddenTextarea?.focus();
+  });
+
+  fabricCanvas.value?.add(textbox);
+  fabricCanvas.value?.setActiveObject(textbox);
+  textbox.enterEditing();
+  textbox.hiddenTextarea?.focus();
+  fabricCanvas.value?.renderAll();
+};
 </script>
 
 <template>
   <div class="canvas-container">
     <ClientOnly>
-      <canvas ref="canvasRef" width="800" height="600" class="fabric-canvas" />
+      <canvas ref="canvasRef" class="fabric-canvas" />
     </ClientOnly>
 
     <div class="control-buttons">
@@ -122,6 +147,7 @@ const deleteSelectedObject = () => {
       >
       <v-btn @click="groupSelected" color="blue">グループ化</v-btn>
       <v-btn @click="ungroupSelected" color="blue">グループ解除</v-btn>
+      <v-btn @click="addTextbox" color="blue">テキストボックス追加</v-btn>
       <v-btn color="green" @click="uploadInputRef?.click()">Template入力</v-btn>
       <v-btn color="green" @click="uploadInputRef2?.click()">Do入力</v-btn>
       <input
@@ -145,18 +171,21 @@ const deleteSelectedObject = () => {
 
 <style scoped>
 .canvas-container {
-  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px;
+  flex-direction: column; /* 子要素を縦方向に並べる */
+  justify-content: space-between; /* 上下の要素を均等に配置 */
   background: #fafafa;
+  padding: 16px;
   border-radius: 8px;
-  gap: 16px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .control-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  justify-content: center;
 }
 </style>
