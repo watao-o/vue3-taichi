@@ -64,6 +64,14 @@ const exportEditor = () => {
   const data = editor.value!.getJSON() as JSONContent;
   editorStore.setEditorData(data);
 };
+
+// 履歴からのインポート用関数
+const importEditor = (data: JSONContent) => {
+  editor.value!.commands.setContent(data);
+};
+
+defineExpose({ importEditor });
+
 </script>
 
 <style scoped></style>

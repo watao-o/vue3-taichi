@@ -4,8 +4,7 @@ import Canvas from "~/components/Canvas.vue";
 import Tiptap from "~/components/Tiptap.vue";
 import History from "~/components/History.vue";
 
-// リアクティブな状態
-const count = ref(0);
+const tiptapRef = ref();
 
 const diagnosisResults = ref([
   { label: "血圧", content: "140/111 mmHg" },
@@ -29,6 +28,10 @@ const diagnosisHistory = ref([
 
 const historyData = ref(null);
 
+const handleHistoryClick = (editorData) => {
+  tiptapRef.value?.importEditor(editorData);
+};
+
 const handleExportData = (data) => {
   historyData.value = data;
 };
@@ -51,11 +54,14 @@ onMounted(() => {});
       <v-row>
         <v-col cols="12" lg="6" class="border-e mb-4 lg:mb-0">
           <p class="text-lg font-bold mb-2">診療履歴一覧</p>
-          <History />
+          <History @clickHistory="handleHistoryClick" />
         </v-col>
         <v-col cols="12" lg="6">
           <p class="text-lg font-bold mb-2">SOAPエディタ</p>
-          <Tiptap @export-data="handleExportData" />
+          <Tiptap
+            ref="tiptapRef"
+            @export-data="handleExportData"
+          />
         </v-col>
       </v-row>
     </v-card-text>

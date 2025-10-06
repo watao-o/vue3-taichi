@@ -1,7 +1,13 @@
 <template>
   <v-list>
     <v-list-item v-for="(history, index) in diagnosisHistory" :key="index">
-      <v-list-item-title>{{ history.date }}</v-list-item-title>
+      <v-list-item-title
+        class="text-primary text-decoration-underline"
+        style="cursor:pointer"
+        @click="onClickHistory(history, index)"
+      >
+        {{ history.date }}
+      </v-list-item-title>
       <v-list-item-textarea>
         <div v-html="history.html"></div>
       </v-list-item-textarea>
@@ -27,6 +33,16 @@ interface DiagnosisHistory {
 
 const diagnosisHistory = ref<DiagnosisHistory[]>([]);
 
+const emit = defineEmits<{
+  (e: 'clickHistory', editor: JSONContent): void
+}>();
+
+const onClickHistory = (history: DiagnosisHistory, index: number) => {
+  if (!history.editor) {
+    return;
+  }
+  emit("clickHistory", history.editor);
+};
 // editorStore.editorData の変更を監視
 watch(
   () => editorStore.editorData,
