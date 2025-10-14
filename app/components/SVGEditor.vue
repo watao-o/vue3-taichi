@@ -10,11 +10,23 @@ const { groupSelected, ungroupSelected } = useGroupPlugin(fabricCanvas);
 const uploadInputRef = ref<HTMLInputElement | null>(null);
 const uploadInputRef2 = ref<HTMLInputElement | null>(null);
 
-watch(canvasRef, () => {
+watch(canvasRef, async () => {
+  const container = canvasRef.value?.parentElement;
+
+  const resizeCanvas = () => {
+    if (container && fabricCanvas.value) {
+      fabricCanvas.value.setWidth(container.clientWidth);
+      fabricCanvas.value.setHeight(container.clientHeight);
+      fabricCanvas.value.renderAll();
+    }
+  };
+
   fabricCanvas.value = new fabric.Canvas(canvasRef.value, {
-    selection: true, // 複数選択を有効
-    preserveObjectStacking: true, // オブジェクトの重なり順を保持
+    selection: true,
+    preserveObjectStacking: true,
   });
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 });
 
 const exportCanvasToSVG = () => {
@@ -126,7 +138,6 @@ const addTextbox = () => {
   fabricCanvas.value?.add(textbox);
   fabricCanvas.value?.setActiveObject(textbox);
   textbox.enterEditing();
-  textbox.hiddenTextarea?.focus();
   fabricCanvas.value?.renderAll();
 };
 </script>
@@ -134,7 +145,9 @@ const addTextbox = () => {
 <template>
   <div class="canvas-container">
     <ClientOnly>
-      <canvas ref="canvasRef" class="fabric-canvas" />
+      <div class="canvas-wrapper">
+        <canvas ref="canvasRef" class="canvas" />
+      </div>
     </ClientOnly>
 
     <div class="control-buttons">
@@ -179,7 +192,15 @@ const addTextbox = () => {
   border-radius: 8px;
   width: 100%;
   height: 100vh;
-  overflow-y: auto;
+  overflow: auto;
+  gap: 16px; /* 子要素間のスペースを追加 */
+}
+
+.canvas-wrapper {
+  border: 1px solid black;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .control-buttons {

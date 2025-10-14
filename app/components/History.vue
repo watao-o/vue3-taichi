@@ -4,7 +4,7 @@
       <v-list-item-title
         class="text-primary text-decoration-underline"
         style="cursor:pointer"
-        @click="onClickHistory(history, index)"
+        @click="onClickHistory(history)"
       >
         {{ history.date }}
       </v-list-item-title>
@@ -22,26 +22,22 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 
 import { useEditorStore } from "@/stores/editorStore";
+import { getTodayJST } from "@/utils/DateUtils";
+import type { DiagnosisHistory } from "@/types/DiagnosisHistory";
 
 const editorStore = useEditorStore();
-
-interface DiagnosisHistory {
-  date: string;
-  editor: JSONContent;
-  html: string;
-}
 
 const diagnosisHistory = ref<DiagnosisHistory[]>([]);
 
 const emit = defineEmits<{
-  (e: 'clickHistory', editor: JSONContent): void
+  (e: 'clickHistory', history: DiagnosisHistory): void
 }>();
 
-const onClickHistory = (history: DiagnosisHistory, index: number) => {
+const onClickHistory = (history: DiagnosisHistory) => {
   if (!history.editor) {
     return;
   }
-  emit("clickHistory", history.editor);
+  emit("clickHistory", history);
 };
 // editorStore.editorData の変更を監視
 watch(
@@ -50,7 +46,8 @@ watch(
     try {
       diagnosisHistory.value = newData.map((data, index) => {
         return {
-          date: `履歴 ${index + 1}`,
+          index: index,
+          date: `${getTodayJST()}_${index + 1 }`,
           editor: data,
           html: generateHTML(data, [StarterKit, Image]),
         };

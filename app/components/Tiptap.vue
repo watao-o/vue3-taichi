@@ -8,6 +8,7 @@
         </v-btn>
         <v-btn @click="exportEditor" color="blue"> Export Data </v-btn>
       </div>
+      <v-row class="py-5 pl-5">{{ editingHistory?.date}}</v-row>
       <v-dialog v-model="dialog">
         <SVGEditor @export-svg="insertSVGAsImage" />
       </v-dialog>
@@ -24,15 +25,20 @@ import { useEditor, EditorContent, type JSONContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import SVGEditor from "./SVGEditor.vue";
+import { useEditorStore } from "@/stores/editorStore";
+
+import type { DiagnosisHistory } from "@/types/DiagnosisHistory";
 
 const dialog = ref(false);
 const svgData = ref<string | null>(null); // SVGデータを保存するためのref
+const editingHistory = ref<DiagnosisHistory | null>(null);
 
 const editor = useEditor({
   content: "<p>I'm running Tiptap with Vue.js. 🎉</p>",
   extensions: [StarterKit, Image],
 });
 const editorStore = useEditorStore();
+
 
 const insertSVGAsImage = (svg: string) => {
   svgData.value = svg; // SVGデータを保存
@@ -62,12 +68,21 @@ const downloadSVG = () => {
 
 const exportEditor = () => {
   const data = editor.value!.getJSON() as JSONContent;
-  editorStore.setEditorData(data);
+  if (editingHistory.value !== null) {
+    // 既存の履歴を更新
+    editorStore.updateEditorData(editingHistory.value.index, data);
+    editingHistory.value = null;
+    return;
+  } else {
+    // 新しい履歴を追加
+    editorStore.setEditorData(data);
+  }
 };
 
 // 履歴からのインポート用関数
-const importEditor = (data: JSONContent) => {
-  editor.value!.commands.setContent(data);
+const importEditor = (history: DiagnosisHistory) => {
+  editor.value!.commands.setContent(history.editor);
+  editingHistory.value = history;
 };
 
 defineExpose({ importEditor });

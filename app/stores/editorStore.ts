@@ -9,6 +9,11 @@ export const useEditorStore = defineStore("editor", {
     setEditorData(data: JSONContent) {
       this.editorData.push(data); // データを配列に追加
     },
+    updateEditorData(index: number, data: JSONContent) {
+      if (index >= 0 && index < this.editorData.length) {
+        this.editorData[index] = data; // 指定されたインデックスのデータを更新
+      }
+    },
     clearEditorData() {
       this.editorData = []; // データをクリア
     },
