@@ -23,6 +23,7 @@ export default defineNuxtConfig({
     "@nuxtjs/tailwindcss",
     "@nuxtjs/ngrok",
   ],
+  test: true,
   vite: {
     vue: {
       template: {

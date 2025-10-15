@@ -1,12 +1,15 @@
 <template>
   <v-list>
     <v-list-item v-for="(history, index) in diagnosisHistory" :key="index">
-      <v-list-item-title
-        class="text-primary text-decoration-underline"
-        style="cursor:pointer"
-        @click="onClickHistory(history)"
-      >
-        {{ history.date }}
+      <v-list-item-title>
+        <button
+          type="button"
+          class="text-primary text-decoration-underline"
+          style="cursor: pointer"
+          @click="onClickHistory(history)"
+        >
+          {{ history.date }}
+        </button>
       </v-list-item-title>
       <v-list-item-textarea>
         <div v-html="history.html"></div>
@@ -30,14 +33,14 @@ const editorStore = useEditorStore();
 const diagnosisHistory = ref<DiagnosisHistory[]>([]);
 
 const emit = defineEmits<{
-  (e: 'clickHistory', history: DiagnosisHistory): void
+  (e: "clickHistory", editor: JSONContent): void;
 }>();
 
 const onClickHistory = (history: DiagnosisHistory) => {
   if (!history.editor) {
     return;
   }
-  emit("clickHistory", history);
+  emit("clickHistory", history.editor);
 };
 // editorStore.editorData の変更を監視
 watch(
@@ -47,7 +50,7 @@ watch(
       diagnosisHistory.value = newData.map((data, index) => {
         return {
           index: index,
-          date: `${getTodayJST()}_${index + 1 }`,
+          date: `${getTodayJST()}_${index + 1}`,
           editor: data,
           html: generateHTML(data, [StarterKit, Image]),
         };
