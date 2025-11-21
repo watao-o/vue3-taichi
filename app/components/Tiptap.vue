@@ -7,8 +7,14 @@
           Download SVG
         </v-btn>
         <v-btn @click="exportEditor" color="blue"> Export Data </v-btn>
+        <v-btn
+          @click="startSpeechRecognition"
+          :color="isListening ? 'red' : 'green'"
+          icon
+        >
+          <v-icon icon="mdi-microphone"></v-icon>
+        </v-btn>
       </div>
-      <v-row class="py-5 pl-5">{{ editingHistory?.date}}</v-row>
       <v-dialog v-model="dialog">
         <SVGEditor @export-svg="insertSVGAsImage" />
       </v-dialog>
@@ -25,13 +31,10 @@ import { useEditor, EditorContent, type JSONContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import SVGEditor from "./SVGEditor.vue";
-import { useEditorStore } from "@/stores/editorStore";
-
-import type { DiagnosisHistory } from "@/types/DiagnosisHistory";
 
 const dialog = ref(false);
 const svgData = ref<string | null>(null); // SVGデータを保存するためのref
-const editingHistory = ref<DiagnosisHistory | null>(null);
+const isListening = ref(false); // 音声入力中かどうか
 
 const editor = useEditor({
   content: "<p>I'm running Tiptap with Vue.js. 🎉</p>",
@@ -39,6 +42,47 @@ const editor = useEditor({
 });
 const editorStore = useEditorStore();
 
+// 音声入力機能
+const startSpeechRecognition = () => {
+  const SpeechRecognition =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("このブラウザは音声入力をサポートしていません。");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "ja-JP";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isListening.value = true;
+  };
+
+  recognition.onend = () => {
+    isListening.value = false;
+  };
+
+  recognition.onresult = (event: any) => {
+    const transcript = event.results[0][0].transcript;
+    editor.value?.commands.insertContent(transcript + " ");
+  };
+
+  recognition.onerror = (event: any) => {
+    console.error("Speech recognition error", event.error);
+    isListening.value = false;
+  };
+
+  if (isListening.value) {
+    recognition.stop();
+  } else {
+    recognition.start();
+  }
+};
 
 const insertSVGAsImage = (svg: string) => {
   svgData.value = svg; // SVGデータを保存
@@ -68,25 +112,20 @@ const downloadSVG = () => {
 
 const exportEditor = () => {
   const data = editor.value!.getJSON() as JSONContent;
-  if (editingHistory.value !== null) {
-    // 既存の履歴を更新
-    editorStore.updateEditorData(editingHistory.value.index, data);
-    editingHistory.value = null;
-    return;
-  } else {
-    // 新しい履歴を追加
-    editorStore.setEditorData(data);
-  }
+  editorStore.setEditorData(data);
 };
 
 // 履歴からのインポート用関数
-const importEditor = (history: DiagnosisHistory) => {
-  editor.value!.commands.setContent(history.editor);
-  editingHistory.value = history;
+const importEditor = (data: JSONContent) => {
+  editor.value!.commands.setContent(data);
 };
 
-defineExpose({ importEditor });
+// 外部からのコンテンツ挿入用関数
+const insertContent = (content: string) => {
+  editor.value!.commands.insertContent(content);
+};
 
+defineExpose({ importEditor, insertContent });
 </script>
 
 <style scoped></style>

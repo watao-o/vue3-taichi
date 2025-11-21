@@ -5,4 +5,6 @@ export interface DiagnosisHistory {
   date: string;
   editor: JSONContent;
   html: string;
+  author?: string;
+  updatedAt?: string;
 }
